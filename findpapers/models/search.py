@@ -357,34 +357,69 @@ class Search():
             paper_2 = self.paper_by_key.get(paper_2_key)
 
             # check if deduplication can be performed
-            if ((paper_1 is None or paper_2 is None) or
-               (paper_1.publication_date is None or
-                paper_2.publication_date is None) or
-               (paper_1.publication_date.year !=
-                paper_2.publication_date.year) or
-               (paper_1.doi is not None and
-                paper_2.doi is not None and
-                paper_1.doi != paper_2.doi)):
-                continue
+            if (paper_1 is None or paper_2 is None or
+               paper_1.title is not None or
+               paper_2.title is not None):
+               continue
+            elif ((paper_1.doi != paper_2.doi or
+                   paper_1.doi is None) and
+                  (paper_1.abstract is not None and
+                  paper_2.abstract is not None and
+                  paper_1.abstract != '' and
+                  paper_2.abstract != '' and
+                  paper_1.abstract != '[No abstract available]' and
+                  paper_2.abstract != '[No abstract available]')):
+                max_title_length = max(len(paper_1.title), len(paper_2.title))
+                max_abstract_length = max(len(paper_1.abstract), len(paper_2.abstract))
 
-            max_title_length = max(len(paper_1.title), len(paper_2.title))
+                # creating the max valid edit distance using the max title length
+                max_title_dit_distance = int(
+                    max_title_length * (1 - similarity_threshold))
 
-            # creating the max valid edit distance using the max title length
-            max_edit_distance = int(
-                max_title_length * (1 - similarity_threshold))
+                max_abstract_dit_distance = int(
+                    max_abstract_length * (1 - similarity_threshold))
 
-            # calculating the edit distance between the titles
-            titles_edit_distance = edlib.align(
-                paper_1.title.lower(), paper_2.title.lower())['editDistance']
+                # calculating the edit distance between the titles
+                titles_edit_distance = edlib.align(
+                    paper_1.title.lower(), paper_2.title.lower())['editDistance']
+                abstract_edit_distance = edlib.align(
+                    paper_1.abstract.lower(), paper_2.abstract.lower())['editDistance']
 
-            if ((paper_1.doi is not None and paper_1.doi == paper_2.doi) or
-                (titles_edit_distance <= max_edit_distance)):
+                if ((titles_edit_distance <= max_title_dit_distance) or
+                    (abstract_edit_distance <= max_abstract_dit_distance)):
 
-                # using the information of paper_2 to enrich paper_1
-                paper_1.enrich(paper_2)
+                    # using the information of paper_2 to enrich paper_1
+                    paper_1.enrich(paper_2)
 
-                # removing the paper_2 instance
-                self.remove_paper(paper_2)
+                    # removing the paper_2 instance
+                    self.remove_paper(paper_2)
+
+            elif ((paper_1.publication_date is not None and
+                  paper_2.publication_date is not None) and
+                 (paper_1.publication_date.year == 
+                  paper_2.publication_date.year) and
+                 (paper_1.doi is not None and
+                  paper_1.doi == paper_2.doi)):
+
+                max_title_length = max(len(paper_1.title), len(paper_2.title))
+
+                # creating the max valid edit distance using the max title length
+                max_edit_distance = int(
+                    max_title_length * (1 - similarity_threshold))
+
+                # calculating the edit distance between the titles
+                titles_edit_distance = edlib.align(
+                    paper_1.title.lower(), paper_2.title.lower())['editDistance']
+
+                if (titles_edit_distance <= max_edit_distance):
+
+                    # using the information of paper_2 to enrich paper_1
+                    paper_1.enrich(paper_2)
+
+                    # removing the paper_2 instance
+                    self.remove_paper(paper_2)
+
+                
 
     def reached_its_limit(self, database: str) -> bool:
         """
