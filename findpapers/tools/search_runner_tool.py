@@ -101,8 +101,9 @@ def _enrich(search: Search, scopus_api_token: Optional[str] = None):
 
     for i, paper in enumerate(search.papers):
 
-        # skip cross-refs
-        if cross_ref_searcher.DATABASE_LABEL in paper.databases:
+        # skip if irrelevant
+        if (cross_ref_searcher.DATABASE_LABEL in paper.databases or
+            paper.abstract is not None):
             continue
 
         logging.info(f'({i+1}/{len(search.papers)}) '
@@ -207,7 +208,7 @@ def _enrich(search: Search, scopus_api_token: Optional[str] = None):
         except Exception:  # pragma: no cover
             pass
 
-    if scopus_api_token is not None:
+    if (scopus_api_token is not None):
 
         try:
             scopus_searcher.enrich_publication_data(search, scopus_api_token)
@@ -219,22 +220,26 @@ def _enrich(search: Search, scopus_api_token: Optional[str] = None):
 def _filter(search: Search):
     """
     Private method that filter the search results
+    and empty abstracts
 
     Parameters
     ----------
     search : Search
         A search instance
     """
-
-    if search.publication_types is not None:
-        for paper in list(search.papers):
-            try:
-                if (paper.publication is not None and paper.publication.category.lower() not in search.publication_types) or \
-                    (paper.publication is None and 'other' not in search.publication_types):
-                    search.remove_paper(paper)
-            except Exception:
-                pass
-
+    for paper in list(search.papers):
+        # filter empty abstracts
+        try:
+            if (paper.abstract is None or
+                paper.abstract == '[No abstract available]'):
+                search.remove_paper(paper)
+            elif (search.publication_types is not None and
+                ((paper.publication is not None and 
+                paper.publication.category.lower() not in search.publication_types) or
+               (paper.publication is None and 'other' not in search.publication_types))):
+                search.remove_paper(paper)
+        except Exception:
+            pass
 
 def _flag_potentially_predatory_publications(search: Search):
     """
@@ -453,6 +458,7 @@ def search(outputpath: str,
            similarity_threshold: Optional[float] = 0.95,
            rxiv_query: Optional[str] = None, 
            cross_reference_search: Optional[bool] = False,
+           enrich: Optional[bool] = False,
            verbose: Optional[bool] = False) -> dict:
     """
     This function will find papers from some databases
@@ -529,7 +535,11 @@ def search(outputpath: str,
 
     cross_reference_search: Optional[bool], optional
         Starts cross reference search of citations and refrences based on DOIs
+        By default False
 
+    enrich: Optional[bool], optional
+        Extends search results via Scopus.
+        By default False
 
     verbose : Optional[bool], optional
         If you wanna a verbose logging
@@ -568,14 +578,17 @@ def search(outputpath: str,
     if query is not None:
         query = _sanitize_query(query)
 
-    if rxiv_query is not None:
-        rxiv_query = _sanitize_query(rxiv_query)
-
-    if rxiv_query is None or not _is_query_ok(rxiv_query):
-        raise ValueError('Invalid rxiv_query format')
-
     if query is None or not _is_query_ok(query):
         raise ValueError('Invalid query format')
+
+    # check if rxiv is relevant and replace available rxiv query
+    rxiv_relevance = any('rxiv' in s for s in databases)
+    if rxiv_relevance and rxiv_query is not None:
+        rxiv_query = _sanitize_query(rxiv_query)
+        if not _is_query_ok(rxiv_query):
+            raise ValueError('Invalid rxiv_query format')
+    elif rxiv_relevance:
+        rxiv_query = query
 
     if ieee_api_token is None:
         ieee_api_token = os.getenv('FINDPAPERS_IEEE_API_TOKEN')
@@ -650,8 +663,9 @@ def search(outputpath: str,
         _database_safe_run(lambda: cross_ref_searcher.run(search),
                            search, cross_ref_searcher.DATABASE_LABEL)
 
-    logging.info('Enriching results...')
-    _enrich(search, scopus_api_token)
+    if enrich:
+        logging.info('Enriching results...')
+        _enrich(search, scopus_api_token)
 
     logging.info('Filtering results...')
     _filter(search)
