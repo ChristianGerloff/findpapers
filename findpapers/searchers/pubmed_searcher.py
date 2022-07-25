@@ -237,6 +237,9 @@ def _get_paper(paper_entry: dict, publication: Publication) -> Paper:
     try:
         keywords = pubmed_article.get('MedlineCitation').get(
             'KeywordList').get('Keyword')
+            
+        # add publication type
+        keywords.extend(article.get('PublicationTypeList').get('PublicationType'))
         paper_keywords = set([_get_text_recursively(x).strip() for
                               x in keywords])
     except Exception:
