@@ -11,6 +11,28 @@ from typing import List
 from findpapers.models.search import Search
 
 
+def _spit_page_information(pages: str = None):
+    """Split page information into start and end page.
+
+    Args:
+        pages (str, optional): page string. Defaults to None.
+
+    Returns:
+        str: start_page, end_page
+    """
+
+    if pages is None:
+        return '', ''
+    if '-' in pages:
+        return pages.split('-')
+    elif ',' in pages:
+        return pages.split(',')
+    elif ' ' in pages:
+        return pages.split(' ')
+    else:
+        return pages, ''
+
+
 @dataclass
 class RisPaper:
     id: int
@@ -21,6 +43,8 @@ class RisPaper:
     date: datetime
     name_of_database: List[str]
     doi: str
+    start_page: str
+    end_page: str
     alternate_title3: str
     journal_name: str
     keywords: List[str]
@@ -85,6 +109,8 @@ class RisExport:
                             date=p.publication_date,
                             name_of_database=list(p.databases),
                             doi=p.doi,
+                            start_page=_spit_page_information(p.pages)[0],
+                            end_page=_spit_page_information(p.pages)[1],
                             alternate_title3=p.publication.title,
                             journal_name=p.publication.title,
                             keywords=list(p.keywords),
