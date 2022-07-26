@@ -156,8 +156,9 @@ class RisExport:
                               skip_unknown_tags=True,
                               enforce_list_tags=False)  # convert to ris
 
-            with open(filename, 'w') as file:
-                file.writelines(ris)
+            if filename is not None:
+                with open(filename, 'w') as file:
+                    file.writelines(ris)
         else:
             papers = None
             ris = None
