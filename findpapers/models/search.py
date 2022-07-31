@@ -419,8 +419,6 @@ class Search():
                     # removing the paper_2 instance
                     self.remove_paper(paper_2)
 
-                
-
     def reached_its_limit(self, database: str) -> bool:
         """
         Returns a flag that says if the search has reached its limit
@@ -489,6 +487,7 @@ class Search():
             papers.add(Paper.from_dict(paper))
 
         return cls(query, since, until, limit, limit_per_database, processed_at, databases, publication_types, papers)
+
 
     @staticmethod
     def to_dict(search: Search) -> dict:

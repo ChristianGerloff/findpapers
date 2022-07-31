@@ -402,5 +402,5 @@ def run(search: Search):
                 logging.debug(e, exc_info=True)
 
         if papers_count < total_papers and not search.reached_its_limit(DATABASE_LABEL):
-            time.sleep(1) # sleep for 1 second to avoid server blocking
+            time.sleep(1)  # sleep for 1 second to avoid server blocking
             result = _get_api_result(search, papers_count)

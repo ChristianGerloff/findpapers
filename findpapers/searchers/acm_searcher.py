@@ -158,14 +158,25 @@ def _get_paper(paper_page: html.HtmlElement, paper_doi: str, paper_url: str) -> 
         A paper instance
     """
 
-    paper_abstract = paper_page.xpath(
-        '//*[contains(@class, "abstractSection")]/p')[0].text
+    paper_abstract = None
+    simple_abstract = paper_page.xpath(
+        '//*[contains(@class, "abstractSection")]/p')
+    full_abstract = paper_page.xpath(
+        '//*[contains(@class, "abstractSection abstractInFull")]/'
+        '*[contains(@class, "abstractSection abstractInFull")]/section/p')
+    if simple_abstract is not None and len(simple_abstract) > 0:
+        paper_abstract = simple_abstract[0].text
+    elif full_abstract is not None and len(full_abstract) > 0:
+        paper_abstract = full_abstract[0].text
 
-    citation_elements = paper_page.xpath(
+    cite_paper = paper_page.xpath(
         '//*[contains(@class, "article-metric citation")]//span')
-    paper_citations = None
-    if len(citation_elements) == 1:
-        paper_citations = int(citation_elements[0].text)
+    cite_miscs = paper_page.xpath(
+        '//*[@class="bibliometrics__count"]/span')
+    if len(cite_paper) > 0:
+        paper_citations = int(cite_paper[0].text)
+    elif len(cite_miscs) > 0:
+        paper_citations = int(cite_miscs[0].text)
 
     paper_metadata = _get_paper_metadata(paper_doi)
 
@@ -173,22 +184,17 @@ def _get_paper(paper_page: html.HtmlElement, paper_doi: str, paper_url: str) -> 
         return None
 
     publication = None
-    publication_title = paper_metadata.get('container-title', None)
+    paper_title = paper_metadata.get('title', None)
 
-    if publication_title is not None and len(publication_title) > 0:
+    if paper_title is not None and len(paper_title) > 0:
 
         publication_isbn = paper_metadata.get('ISBN', None)
         publication_issn = paper_metadata.get('ISSN', None)
         publication_publisher = paper_metadata.get('publisher', None)
         publication_category = paper_metadata.get('type', None)
 
-        publication = Publication(publication_title, publication_isbn,
+        publication = Publication(paper_title, publication_isbn,
                                   publication_issn, publication_publisher, publication_category)
-
-    paper_title = paper_metadata.get('title', None)
-
-    if paper_title is None or len(paper_title) == 0:
-        return None
 
     paper_authors = paper_metadata.get('author', [])
     paper_authors = ['{}, {}'.format(
@@ -254,11 +260,17 @@ def run(search: Search):
     page_index = 0
     while(papers_count < total_papers and not search.reached_its_limit(DATABASE_LABEL)):
 
-        papers_urls = [BASE_URL + x.attrib['href']
+
+        pub_urls = [BASE_URL + x.attrib['href']
                        for x in result.xpath('//*[@class="hlFld-Title"]/a')]
 
+        misc_urls = [BASE_URL + x.attrib['href']
+                      for x in result.xpath('//*[@class="hlFld-ContentGroupTitle"]/a')]
+
+        papers_urls = pub_urls + misc_urls
         if papers_urls is None or len(papers_urls) == 0:
             break
+
         for paper_url in papers_urls:
 
             if papers_count >= total_papers or search.reached_its_limit(DATABASE_LABEL):
@@ -269,7 +281,11 @@ def run(search: Search):
 
                 paper_page = _get_paper_page(paper_url)
 
-                paper_title = paper_page.xpath('//*[@class="citation__title"]')[0].text
+                if paper_url in pub_urls:
+                    paper_title = paper_page.xpath('//*[@class="citation__title"]')[0].text
+
+                else:
+                    paper_title = paper_page.xpath('//*[@class="article__tocHeading"]')[3].text
 
                 logging.info(f'({papers_count}/{total_papers}) Fetching ACM paper: {paper_title}')
 

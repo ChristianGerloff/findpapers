@@ -85,6 +85,8 @@ class Publication():
                 value = 'Book'
             elif 'preprint' in value.lower():
                 value = 'Preprint'
+            elif 'thesis' in value.lower():
+                value = 'Thesis'
             else:
                 value = None
 
