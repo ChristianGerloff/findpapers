@@ -1,6 +1,4 @@
 import logging
-import math
-import requests
 import datetime
 from urllib.parse import urlencode
 from typing import Optional
@@ -35,10 +33,10 @@ def _get_search_url(search: Search, start_record: Optional[int] = 0) -> str:
     str
         a URL to be used to retrieve data from ACM database
     """
-    
+
     # when a wildcard is present, the search term cannot be enclosed in quotes
     transformed_query = query_util.replace_search_term_enclosures(search.query, '', '', True)
-    
+
     # some additional query transformations
     transformed_query = transformed_query.replace(' AND NOT ', ' NOT ')
     transformed_query = query_util.replace_search_term_enclosures(transformed_query, '"', '"')
@@ -46,8 +44,8 @@ def _get_search_url(search: Search, start_record: Optional[int] = 0) -> str:
     query = f'Abstract:({transformed_query})'
 
     # the OR connector between the fields are not working properly, so we'll use only the abstract for now
-    #query += f' OR Keyword:({transformed_query})'
-    #query += f' OR Title:({transformed_query})'
+    query += f' OR Keyword:({transformed_query})'
+    query += f' OR Title:({transformed_query})'
 
     url_parameters = {
         'fillQuickSearch': 'false',
@@ -185,7 +183,7 @@ def _get_paper(paper_page: html.HtmlElement, paper_doi: str, paper_url: str) -> 
         publication_category = paper_metadata.get('type', None)
 
         publication = Publication(publication_title, publication_isbn,
-                                publication_issn, publication_publisher, publication_category)
+                                  publication_issn, publication_publisher, publication_category)
 
     paper_title = paper_metadata.get('title', None)
 
@@ -256,9 +254,11 @@ def run(search: Search):
     page_index = 0
     while(papers_count < total_papers and not search.reached_its_limit(DATABASE_LABEL)):
 
-        papers_urls = [BASE_URL+x.attrib['href']
+        papers_urls = [BASE_URL + x.attrib['href']
                        for x in result.xpath('//*[@class="hlFld-Title"]/a')]
 
+        if papers_urls is None or len(papers_urls) == 0:
+            break
         for paper_url in papers_urls:
 
             if papers_count >= total_papers or search.reached_its_limit(DATABASE_LABEL):
@@ -272,7 +272,7 @@ def run(search: Search):
                 paper_title = paper_page.xpath('//*[@class="citation__title"]')[0].text
 
                 logging.info(f'({papers_count}/{total_papers}) Fetching ACM paper: {paper_title}')
-                
+
                 paper_doi = None
                 if '/abs/' in paper_url:
                     paper_doi = paper_url.split('/abs/')[1]
@@ -285,7 +285,7 @@ def run(search: Search):
 
                 if paper is None:
                     continue
-                
+
                 paper.add_database(DATABASE_LABEL)
 
                 search.add_paper(paper)
