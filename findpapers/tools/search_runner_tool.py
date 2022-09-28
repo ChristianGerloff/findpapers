@@ -445,6 +445,7 @@ def _add_refs_cites(search: Search):
 
 
 def search(outputpath: str,
+           pbar,
            query: Optional[str] = None,
            since: Optional[datetime.date] = None,
            until: Optional[datetime.date] = None,
@@ -469,6 +470,9 @@ def search(outputpath: str,
     outputpath : str
         A valid file path where the search result file will be placed
 
+    pbar: stqdm.stqdm.stqdm
+        stqdm instance for progress bar.
+    
     query : str, optional
 
         A query string that will be used to perform the papers search.
@@ -606,19 +610,19 @@ def search(outputpath: str,
 
     if (databases is None or
        pubmed_searcher.DATABASE_LABEL.lower() in databases):
-        _database_safe_run(lambda: pubmed_searcher.run(search),
+        _database_safe_run(lambda: pubmed_searcher.run(search, pbar),
                            search, pubmed_searcher.DATABASE_LABEL)
 
     if (databases is None or
        acm_searcher.DATABASE_LABEL.lower() in databases):
-        _database_safe_run(lambda: acm_searcher.run(search),
+        _database_safe_run(lambda: acm_searcher.run(search, pbar),
                            search, acm_searcher.DATABASE_LABEL)
 
     if ieee_api_token is not None:
         if (databases is None or
            ieee_searcher.DATABASE_LABEL.lower() in databases):
             _database_safe_run(
-                lambda: ieee_searcher.run(search, ieee_api_token),
+                lambda: ieee_searcher.run(search, ieee_api_token, pbar),
                 search, ieee_searcher.DATABASE_LABEL)
     else:
         logging.info('IEEE API token not found, '
@@ -628,7 +632,7 @@ def search(outputpath: str,
         if (databases is None or
            scopus_searcher.DATABASE_LABEL.lower() in databases):
             _database_safe_run(lambda: scopus_searcher.run(
-                search, scopus_api_token),
+                search, scopus_api_token, pbar),
                 search, scopus_searcher.DATABASE_LABEL)
     else:
         logging.info('Scopus API token not found, '
@@ -637,21 +641,21 @@ def search(outputpath: str,
     if databases is None or arxiv_searcher.DATABASE_LABEL.lower() in databases:
         # reset search query
         search.set_query(rxiv_query)
-        _database_safe_run(lambda: arxiv_searcher.run(search),
+        _database_safe_run(lambda: arxiv_searcher.run(search, pbar),
                            search, arxiv_searcher.DATABASE_LABEL)
 
     if (databases is None or
        medrxiv_searcher.DATABASE_LABEL.lower() in databases):
         # reset search query
         search.set_query(rxiv_query)
-        _database_safe_run(lambda: medrxiv_searcher.run(search),
+        _database_safe_run(lambda: medrxiv_searcher.run(search, pbar),
                            search, medrxiv_searcher.DATABASE_LABEL)
 
     if (databases is None or
        biorxiv_searcher.DATABASE_LABEL.lower() in databases):
         # reset search query
         search.set_query(rxiv_query)
-        _database_safe_run(lambda: biorxiv_searcher.run(search),
+        _database_safe_run(lambda: biorxiv_searcher.run(search, pbar),
                            search, biorxiv_searcher.DATABASE_LABEL)
 
     logging.info('Add references and citations...')

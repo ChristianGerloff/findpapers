@@ -4,7 +4,7 @@ import findpapers.searchers.rxiv_searcher as rxiv_searcher
 DATABASE_LABEL = 'medRxiv'
 
 
-def run(search: Search):
+def run(search: Search, pbar):
     """
     This method fetch papers from medRxiv database using the provided search parameters
     After fetch the data from medRxiv, the collected papers are added to the provided search instance
@@ -13,6 +13,8 @@ def run(search: Search):
     ----------
     search : Search
         A search instance
+    pbar: stqdm.stqdm.stqdm
+        stqdm instance for progress bar.
     """
 
-    rxiv_searcher.run(search, DATABASE_LABEL)
+    rxiv_searcher.run(search, DATABASE_LABEL, pbar)

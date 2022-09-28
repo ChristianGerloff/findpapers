@@ -340,7 +340,7 @@ def _get_paper(paper_entry: dict,
     return paper
 
 
-def run(search: Search):
+def run(search: Search, pbar):
     """
     This method fetch papers from arXiv database using the provided search parameters
     After fetch the data from arXiv, the collected papers are added to the provided search instance
@@ -349,7 +349,8 @@ def run(search: Search):
     ----------
     search : Search
         A search instance
-
+    pbar: stqdm.stqdm.stqdm
+        stqdm instance for progress bar.
     """
 
     papers_count = 0
@@ -397,6 +398,7 @@ def run(search: Search):
                 if paper is not None:
                     paper.add_database(DATABASE_LABEL)
                     search.add_paper(paper)
+                pbar.update(1)
 
             except Exception as e:  # pragma: no cover
                 logging.debug(e, exc_info=True)

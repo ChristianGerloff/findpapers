@@ -4,7 +4,7 @@ import findpapers.searchers.rxiv_searcher as rxiv_searcher
 DATABASE_LABEL = 'bioRxiv'
 
 
-def run(search: Search):
+def run(search: Search, pbar):
     """
     This method fetch papers from bioRxiv database
     using the provided search parameters.
@@ -15,6 +15,8 @@ def run(search: Search):
     ----------
     search : Search
         A search instance
+    pbar: stqdm.stqdm.stqdm
+        stqdm instance for progress bar.
     """
 
-    rxiv_searcher.run(search, DATABASE_LABEL)
+    rxiv_searcher.run(search, DATABASE_LABEL, pbar)
