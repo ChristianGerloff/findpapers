@@ -398,8 +398,13 @@ def run(search: Search, pbar):
                 if paper is not None:
                     paper.add_database(DATABASE_LABEL)
                     search.add_paper(paper)
-                pbar.update(1)
 
+            except Exception as e:  # pragma: no cover
+                logging.debug(e, exc_info=True)
+
+            try:
+                if pbar is not None:
+                    pbar.update(1)
             except Exception as e:  # pragma: no cover
                 logging.debug(e, exc_info=True)
 

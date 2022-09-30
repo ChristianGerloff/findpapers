@@ -445,7 +445,6 @@ def _add_refs_cites(search: Search):
 
 
 def search(outputpath: str,
-           pbar,
            query: Optional[str] = None,
            since: Optional[datetime.date] = None,
            until: Optional[datetime.date] = None,
@@ -460,7 +459,8 @@ def search(outputpath: str,
            rxiv_query: Optional[str] = None, 
            cross_reference_search: Optional[bool] = False,
            enrich: Optional[bool] = False,
-           verbose: Optional[bool] = False) -> dict:
+           verbose: Optional[bool] = False,
+           pbar = None) -> dict:
     """
     This function will find papers from some databases
     based on the provided query.
@@ -469,9 +469,6 @@ def search(outputpath: str,
     ----------
     outputpath : str
         A valid file path where the search result file will be placed
-
-    pbar: stqdm.stqdm.stqdm
-        stqdm instance for progress bar.
     
     query : str, optional
 
@@ -547,6 +544,9 @@ def search(outputpath: str,
 
     verbose : Optional[bool], optional
         If you wanna a verbose logging
+    
+    pbar: stqdm.stqdm.stqdm
+        stqdm instance for progress bar. Defaults to None.
 
     Returns
     -------

@@ -369,7 +369,12 @@ def run(search: Search, database: str, pbar):
                 paper = _get_paper(paper_metadata, database)
                 paper.add_database(database)
                 search.add_paper(paper)
-                pbar.update(1)
 
+            except Exception as e:  # pragma: no cover
+                logging.debug(e, exc_info=True)
+            
+            try:
+                if pbar is not None:
+                    pbar.update(1)
             except Exception as e:  # pragma: no cover
                 logging.debug(e, exc_info=True)
