@@ -610,17 +610,23 @@ def search(outputpath: str,
 
     if (databases is None or
        pubmed_searcher.DATABASE_LABEL.lower() in databases):
+        if pbar is not None:
+            pbar.set_postfix_str("Finding paper in PubMed")
         _database_safe_run(lambda: pubmed_searcher.run(search, pbar),
                            search, pubmed_searcher.DATABASE_LABEL)
 
     if (databases is None or
        acm_searcher.DATABASE_LABEL.lower() in databases):
+        if pbar is not None:
+            pbar.set_postfix_str("Finding paper in ACM")
         _database_safe_run(lambda: acm_searcher.run(search, pbar),
                            search, acm_searcher.DATABASE_LABEL)
 
     if ieee_api_token is not None:
         if (databases is None or
            ieee_searcher.DATABASE_LABEL.lower() in databases):
+            if pbar is not None:
+                pbar.set_postfix_str("Finding paper in IEEE")
             _database_safe_run(
                 lambda: ieee_searcher.run(search, ieee_api_token, pbar),
                 search, ieee_searcher.DATABASE_LABEL)
@@ -631,6 +637,8 @@ def search(outputpath: str,
     if scopus_api_token is not None:
         if (databases is None or
            scopus_searcher.DATABASE_LABEL.lower() in databases):
+            if pbar is not None:
+                pbar.set_postfix_str("Finding paper in Scopus")
             _database_safe_run(lambda: scopus_searcher.run(
                 search, scopus_api_token, pbar),
                 search, scopus_searcher.DATABASE_LABEL)
@@ -641,6 +649,8 @@ def search(outputpath: str,
     if databases is None or arxiv_searcher.DATABASE_LABEL.lower() in databases:
         # reset search query
         search.set_query(rxiv_query)
+        if pbar is not None:
+            pbar.set_postfix_str("Finding paper in rxiv")
         _database_safe_run(lambda: arxiv_searcher.run(search, pbar),
                            search, arxiv_searcher.DATABASE_LABEL)
 
@@ -648,6 +658,8 @@ def search(outputpath: str,
        medrxiv_searcher.DATABASE_LABEL.lower() in databases):
         # reset search query
         search.set_query(rxiv_query)
+        if pbar is not None:
+            pbar.set_postfix_str("Finding paper in medrxiv")
         _database_safe_run(lambda: medrxiv_searcher.run(search, pbar),
                            search, medrxiv_searcher.DATABASE_LABEL)
 
@@ -655,6 +667,8 @@ def search(outputpath: str,
        biorxiv_searcher.DATABASE_LABEL.lower() in databases):
         # reset search query
         search.set_query(rxiv_query)
+        if pbar is not None:
+            pbar.set_postfix_str("Finding paper in biorxiv")
         _database_safe_run(lambda: biorxiv_searcher.run(search, pbar),
                            search, biorxiv_searcher.DATABASE_LABEL)
 
