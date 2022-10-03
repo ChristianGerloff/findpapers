@@ -206,7 +206,7 @@ def _get_paper(paper_entry: dict, publication: Publication) -> Paper:
     return paper
 
 
-def run(search: Search, api_token: str, pbar):
+def run(search: Search, api_token: str, pbar=None):
     """
     This method fetch papers from IEEE database using the provided search parameters
     After fetch the data from IEEE, the collected papers are added to the provided search instance
@@ -218,7 +218,7 @@ def run(search: Search, api_token: str, pbar):
     api_token : str
         The API key used to fetch data from IEEE database
     pbar: stqdm.stqdm.stqdm
-        stqdm instance for progress bar.
+        stqdm instance for progress bar. Defaults to None.
 
     Raises
     ------

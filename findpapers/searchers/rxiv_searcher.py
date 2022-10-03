@@ -313,7 +313,7 @@ def _get_paper(paper_metadata: dict, database: str) -> Paper:
                  paper_comments, paper_number_of_pages, paper_pages)
 
 
-def run(search: Search, database: str, pbar):
+def run(search: Search, database: str, pbar=None):
     """
     This method fetch papers from medRxiv/bioRxiv database using
     the provided search parameters.
@@ -327,7 +327,7 @@ def run(search: Search, database: str, pbar):
     database : str
         The database name (medRxiv or bioRxiv)
     pbar: stqdm.stqdm.stqdm
-        stqdm instance for progress bar.
+        stqdm instance for progress bar.  Defaults to None.
     """
 
     urls = _get_search_urls(search, database)

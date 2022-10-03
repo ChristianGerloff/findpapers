@@ -340,7 +340,7 @@ def _get_paper(paper_entry: dict,
     return paper
 
 
-def run(search: Search, pbar):
+def run(search: Search, pbar=None):
     """
     This method fetch papers from arXiv database using the provided search parameters
     After fetch the data from arXiv, the collected papers are added to the provided search instance
@@ -350,7 +350,7 @@ def run(search: Search, pbar):
     search : Search
         A search instance
     pbar: stqdm.stqdm.stqdm
-        stqdm instance for progress bar.
+        stqdm instance for progress bar.  Defaults to None.
     """
 
     papers_count = 0
