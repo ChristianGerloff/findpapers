@@ -50,3 +50,12 @@ def test_run(search: Search):
     acm_searcher.run(search)
 
     assert len(search.papers) == 14
+
+def test_run_without_pbar(search: Search, pbar=None):
+
+    search.limit = 10
+    search.limit_per_database = None
+
+    acm_searcher.run(search, pbar)
+
+    assert len(search.papers) == 10

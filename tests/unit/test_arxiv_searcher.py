@@ -99,13 +99,13 @@ def test_get_paper(publication: Publication):
     assert 'author A' in paper.authors
 
 
-def test_run(search: Search):
+def test_run_without_pbar(search: Search, pbar=None):
 
     search.limit = 20
     search.limit_per_database = None
     search.since = datetime.date(2020,8,26)
     search.until = datetime.date(2020,8,26)
 
-    arxiv_searcher.run(search)
+    arxiv_searcher.run(search, pbar)
 
     assert len(search.papers) == 18

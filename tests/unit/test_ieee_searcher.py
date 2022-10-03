@@ -78,7 +78,7 @@ def test_get_paper(publication: Publication):
     assert paper_entry.get('pdf_url') in paper.urls
 
 
-def test_run(search: Search):
+def test_run_without_pbar(search: Search, pbar=None):
 
     search.limit = 26
     ieee_searcher.run(search, 'fake-api-token')
@@ -86,7 +86,7 @@ def test_run(search: Search):
     assert len(search.papers) == 26
 
     with pytest.raises(AttributeError):
-        ieee_searcher.run(search, '')
+        ieee_searcher.run(search, '', pbar)
 
     with pytest.raises(AttributeError):
-        ieee_searcher.run(search, None)
+        ieee_searcher.run(search, None, pbar)
