@@ -459,7 +459,8 @@ def search(outputpath: str,
            rxiv_query: Optional[str] = None, 
            cross_reference_search: Optional[bool] = False,
            enrich: Optional[bool] = False,
-           verbose: Optional[bool] = False) -> dict:
+           verbose: Optional[bool] = False,
+           pbar = None) -> dict:
     """
     This function will find papers from some databases
     based on the provided query.
@@ -468,7 +469,7 @@ def search(outputpath: str,
     ----------
     outputpath : str
         A valid file path where the search result file will be placed
-
+    
     query : str, optional
 
         A query string that will be used to perform the papers search.
@@ -543,6 +544,9 @@ def search(outputpath: str,
 
     verbose : Optional[bool], optional
         If you wanna a verbose logging
+    
+    pbar: stqdm.stqdm.stqdm
+        stqdm instance for progress bar. Defaults to None.
 
     Returns
     -------
@@ -606,19 +610,25 @@ def search(outputpath: str,
 
     if (databases is None or
        pubmed_searcher.DATABASE_LABEL.lower() in databases):
-        _database_safe_run(lambda: pubmed_searcher.run(search),
+        if pbar is not None:
+            pbar.set_postfix_str("Finding paper in PubMed")
+        _database_safe_run(lambda: pubmed_searcher.run(search, pbar),
                            search, pubmed_searcher.DATABASE_LABEL)
 
     if (databases is None or
        acm_searcher.DATABASE_LABEL.lower() in databases):
-        _database_safe_run(lambda: acm_searcher.run(search),
+        if pbar is not None:
+            pbar.set_postfix_str("Finding paper in ACM")
+        _database_safe_run(lambda: acm_searcher.run(search, pbar),
                            search, acm_searcher.DATABASE_LABEL)
 
     if ieee_api_token is not None:
         if (databases is None or
            ieee_searcher.DATABASE_LABEL.lower() in databases):
+            if pbar is not None:
+                pbar.set_postfix_str("Finding paper in IEEE")
             _database_safe_run(
-                lambda: ieee_searcher.run(search, ieee_api_token),
+                lambda: ieee_searcher.run(search, ieee_api_token, pbar),
                 search, ieee_searcher.DATABASE_LABEL)
     else:
         logging.info('IEEE API token not found, '
@@ -627,8 +637,10 @@ def search(outputpath: str,
     if scopus_api_token is not None:
         if (databases is None or
            scopus_searcher.DATABASE_LABEL.lower() in databases):
+            if pbar is not None:
+                pbar.set_postfix_str("Finding paper in Scopus")
             _database_safe_run(lambda: scopus_searcher.run(
-                search, scopus_api_token),
+                search, scopus_api_token, pbar),
                 search, scopus_searcher.DATABASE_LABEL)
     else:
         logging.info('Scopus API token not found, '
@@ -637,21 +649,27 @@ def search(outputpath: str,
     if databases is None or arxiv_searcher.DATABASE_LABEL.lower() in databases:
         # reset search query
         search.set_query(rxiv_query)
-        _database_safe_run(lambda: arxiv_searcher.run(search),
+        if pbar is not None:
+            pbar.set_postfix_str("Finding paper in rxiv")
+        _database_safe_run(lambda: arxiv_searcher.run(search, pbar),
                            search, arxiv_searcher.DATABASE_LABEL)
 
     if (databases is None or
        medrxiv_searcher.DATABASE_LABEL.lower() in databases):
         # reset search query
         search.set_query(rxiv_query)
-        _database_safe_run(lambda: medrxiv_searcher.run(search),
+        if pbar is not None:
+            pbar.set_postfix_str("Finding paper in medrxiv")
+        _database_safe_run(lambda: medrxiv_searcher.run(search, pbar),
                            search, medrxiv_searcher.DATABASE_LABEL)
 
     if (databases is None or
        biorxiv_searcher.DATABASE_LABEL.lower() in databases):
         # reset search query
         search.set_query(rxiv_query)
-        _database_safe_run(lambda: biorxiv_searcher.run(search),
+        if pbar is not None:
+            pbar.set_postfix_str("Finding paper in biorxiv")
+        _database_safe_run(lambda: biorxiv_searcher.run(search, pbar),
                            search, biorxiv_searcher.DATABASE_LABEL)
 
     logging.info('Add references and citations...')

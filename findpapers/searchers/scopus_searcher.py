@@ -361,7 +361,7 @@ def enrich_publication_data(search: Search, api_token: str):
                 pass
 
 
-def run(search: Search, api_token: str, url: Optional[str] = None, papers_count: Optional[int] = 0):
+def run(search: Search, api_token: str, pbar=None, url: Optional[str] = None, papers_count: Optional[int] = 0):
     """
     This method fetch papers from Scopus database using the provided search parameters
     After fetch the data from Scopus, the collected papers are added to the provided search instance
@@ -371,7 +371,9 @@ def run(search: Search, api_token: str, url: Optional[str] = None, papers_count:
     search : Search
         A search instance
     api_token : str
-        The API key used to fetch data from Scopus database,
+        The API key used to fetch data from Scopus database
+    pbar: stqdm.stqdm.stqdm
+        stqdm instance for progress bar.  Defaults to None.
     url : Optional[str]
         A predefined URL to be used for the search execution, 
         this is usually used for make the next recursive call on a result pagination
@@ -411,6 +413,12 @@ def run(search: Search, api_token: str, url: Optional[str] = None, papers_count:
                 paper.add_database(DATABASE_LABEL)
                 search.add_paper(paper)
 
+        except Exception as e:  # pragma: no cover
+            logging.debug(e, exc_info=True)
+
+        try:
+            if pbar is not None:
+                pbar.update(1)
         except Exception as e:  # pragma: no cover
             logging.debug(e, exc_info=True)
 

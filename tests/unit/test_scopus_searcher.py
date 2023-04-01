@@ -101,7 +101,7 @@ def test_get_paper_exceptions(publication: Publication, mock_scopus_get_paper_pa
     assert len(paper.keywords) == 0
 
 
-def test_run(search: Search):
+def test_run_without_pbar(search: Search, pbar=None):
 
     search.limit = 3
     scopus_searcher.run(search, 'fake-api-token')
@@ -109,10 +109,10 @@ def test_run(search: Search):
     assert len(search.papers) == 3
 
     with pytest.raises(AttributeError):
-        scopus_searcher.run(search, '')
+        scopus_searcher.run(search, '', pbar)
 
     with pytest.raises(AttributeError):
-        scopus_searcher.run(search, None)
+        scopus_searcher.run(search, None, pbar)
 
 
 def test_enrich_publication_data(search: Search):

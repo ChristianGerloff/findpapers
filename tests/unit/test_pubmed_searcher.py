@@ -121,9 +121,9 @@ def test_get_paper(publication: Publication):
     assert paper.publication_date == datetime.date(2020, 1, 1)
 
 
-def test_run(search: Search):
+def test_run_without_pbar(search: Search, pbar=None):
 
     search.limit = 51
-    pubmed_searcher.run(search)
+    pubmed_searcher.run(search, pbar)
 
     assert len(search.papers) == 51

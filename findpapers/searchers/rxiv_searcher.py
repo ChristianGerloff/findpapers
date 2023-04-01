@@ -313,7 +313,7 @@ def _get_paper(paper_metadata: dict, database: str) -> Paper:
                  paper_comments, paper_number_of_pages, paper_pages)
 
 
-def run(search: Search, database: str):
+def run(search: Search, database: str, pbar=None):
     """
     This method fetch papers from medRxiv/bioRxiv database using
     the provided search parameters.
@@ -326,6 +326,8 @@ def run(search: Search, database: str):
         A search instance
     database : str
         The database name (medRxiv or bioRxiv)
+    pbar: stqdm.stqdm.stqdm
+        stqdm instance for progress bar.  Defaults to None.
     """
 
     urls = _get_search_urls(search, database)
@@ -368,5 +370,11 @@ def run(search: Search, database: str):
                 paper.add_database(database)
                 search.add_paper(paper)
 
+            except Exception as e:  # pragma: no cover
+                logging.debug(e, exc_info=True)
+            
+            try:
+                if pbar is not None:
+                    pbar.update(1)
             except Exception as e:  # pragma: no cover
                 logging.debug(e, exc_info=True)

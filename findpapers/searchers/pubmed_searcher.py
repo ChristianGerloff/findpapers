@@ -291,7 +291,7 @@ def _get_paper(paper_entry: dict, publication: Publication) -> Paper:
     return paper
 
 
-def run(search: Search):
+def run(search: Search, pbar=None):
     """
     This method fetch papers from pubmed database using the 
     provided search parameters. After fetch the data from
@@ -302,9 +302,8 @@ def run(search: Search):
     ----------
     search : Search
         A search instance
-    api_token : str
-        The API key used to fetch data from pubmed database,
-
+    pbar: stqdm.stqdm.stqdm
+        stqdm instance for progress bar. Defaults to None.
     """
 
     if (search.publication_types is not None and
@@ -354,6 +353,12 @@ def run(search: Search):
                         paper.add_database(DATABASE_LABEL)
                         search.add_paper(paper)
 
+            except Exception as e:  # pragma: no cover
+                logging.debug(e, exc_info=True)
+
+            try:
+                if pbar is not None:
+                    pbar.update(1)
             except Exception as e:  # pragma: no cover
                 logging.debug(e, exc_info=True)
 
