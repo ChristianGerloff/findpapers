@@ -459,6 +459,7 @@ def search(outputpath: str,
            rxiv_query: Optional[str] = None, 
            cross_reference_search: Optional[bool] = False,
            enrich: Optional[bool] = False,
+           only_title_abstract: Optional[bool] = False,
            verbose: Optional[bool] = False,
            pbar = None) -> dict:
     """
@@ -542,6 +543,9 @@ def search(outputpath: str,
         Extends search results via Scopus.
         By default False
 
+    only_title_abstract Optional[bool], optional
+        restricts search to title and abstract.
+
     verbose : Optional[bool], optional
         If you wanna a verbose logging
     
@@ -606,7 +610,8 @@ def search(outputpath: str,
                     limit,
                     limit_per_database,
                     databases=databases,
-                    publication_types=publication_types)
+                    publication_types=publication_types,
+                    only_title_abstract=only_title_abstract)
 
     if (databases is None or
        pubmed_searcher.DATABASE_LABEL.lower() in databases):
