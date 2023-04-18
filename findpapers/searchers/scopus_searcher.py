@@ -431,4 +431,4 @@ def run(search: Search, api_token: str, pbar=None, url: Optional[str] = None, pa
     # If there is a next url, the API provided response was paginated and we need to process the next url
     # We'll make a recursive call for it
     if papers_count < total_papers and next_url is not None and not search.reached_its_limit(DATABASE_LABEL):
-        run(search, api_token, next_url, papers_count)
+        run(search, api_token, pbar=None, url=next_url, papers_count=papers_count)
