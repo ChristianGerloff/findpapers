@@ -19,4 +19,4 @@ def run(search: Search, pbar=None):
         stqdm instance for progress bar.  Defaults to None.
     """
 
-    rxiv_searcher.run(search, DATABASE_LABEL, pbar)
+    rxiv_searcher.run(search, DATABASE_LABEL, pbar=pbar)
