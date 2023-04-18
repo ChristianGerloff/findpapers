@@ -21,7 +21,8 @@ class Search():
                  processed_at: Optional[datetime.datetime] = None,
                  databases: Optional[List[str]] = None,
                  publication_types: Optional[List[str]] = None,
-                 papers: Optional[set] = None):
+                 papers: Optional[set] = None,
+                 only_title_abstract: Optional[bool] = False):
         """
         Class constructor
 
@@ -52,6 +53,8 @@ class Search():
             By default None
         papers : set, optional
             A list of papers already collected
+        only_title_abstract: bool, optional
+            Restrict search to abstract and title only
         """
 
         self.query = query
@@ -76,6 +79,8 @@ class Search():
         self.publication_by_key = {}
         self.paper_by_doi = {}
         self.papers_by_database = {}
+
+        self.only_title_abstract = only_title_abstract
 
         self.papers = set()
         if papers is not None:
