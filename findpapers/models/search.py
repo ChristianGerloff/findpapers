@@ -1,7 +1,7 @@
 from __future__ import annotations
 import datetime
 import itertools
-import edlib
+from difflib import SequenceMatcher
 from typing import List, Optional
 from findpapers.models.paper import Paper
 from findpapers.models.publication import Publication
@@ -375,23 +375,29 @@ class Search():
                   paper_1.abstract != '[No abstract available]' and
                   paper_2.abstract != '[No abstract available]')):
                 max_title_length = max(len(paper_1.title), len(paper_2.title))
+                diff_title_length = abs(len(paper_1.title) - len(paper_2.title))
                 max_abstract_length = max(len(paper_1.abstract), len(paper_2.abstract))
+                diff_abstract_length = abs(len(paper_1.abstract) - len(paper_2.abstract))
 
-                # creating the max valid edit distance using the max title length
-                max_title_dit_distance = int(
-                    max_title_length * (1 - similarity_threshold))
+                # Adj: larger length differences decreasing the threshold
+                adjusted_title_threshold = max(
+                    similarity_threshold *
+                    (1 - 0.5 * diff_title_length / max_title_length),
+                    similarity_threshold * 0.75
+                )
+                adjusted_abstract_threshold = max(
+                    similarity_threshold *
+                    (1 - 0.5 * diff_abstract_length / max_abstract_length),
+                    similarity_threshold * 0.75
+                )
+                # calculating the distance between the titles
+                titles_similarity = SequenceMatcher(
+                    None, paper_1.title.lower(), paper_2.title.lower()).ratio()
+                abstracts_similarity = SequenceMatcher(
+                    None, paper_1.abstract.lower(), paper_2.abstract.lower()).ratio()
 
-                max_abstract_dit_distance = int(
-                    max_abstract_length * (1 - similarity_threshold))
-
-                # calculating the edit distance between the titles
-                titles_edit_distance = edlib.align(
-                    paper_1.title.lower(), paper_2.title.lower())['editDistance']
-                abstract_edit_distance = edlib.align(
-                    paper_1.abstract.lower(), paper_2.abstract.lower())['editDistance']
-
-                if ((titles_edit_distance <= max_title_dit_distance) or
-                    (abstract_edit_distance <= max_abstract_dit_distance)):
+                if ((titles_similarity > adjusted_title_threshold) or
+                    (abstracts_similarity > adjusted_abstract_threshold)):
 
                     # using the information of paper_2 to enrich paper_1
                     paper_1.enrich(paper_2)
@@ -401,22 +407,26 @@ class Search():
 
             elif ((paper_1.publication_date is not None and
                   paper_2.publication_date is not None) and
-                 (paper_1.publication_date.year == 
+                 (paper_1.publication_date.year ==
                   paper_2.publication_date.year) and
                  (paper_1.doi is not None and
                   paper_1.doi == paper_2.doi)):
 
                 max_title_length = max(len(paper_1.title), len(paper_2.title))
+                diff_title_length = abs(len(paper_1.title) - len(paper_2.title))
 
-                # creating the max valid edit distance using the max title length
-                max_edit_distance = int(
-                    max_title_length * (1 - similarity_threshold))
+                # Adj: larger length differences decreasing the threshold
+                adjusted_title_threshold = max(
+                    similarity_threshold *
+                    (1 - 0.5 * diff_title_length / max_title_length),
+                    similarity_threshold * 0.75
+                )
 
-                # calculating the edit distance between the titles
-                titles_edit_distance = edlib.align(
-                    paper_1.title.lower(), paper_2.title.lower())['editDistance']
+                # calculating the similarity
+                titles_similarity = SequenceMatcher(
+                    None, paper_1.title.lower(), paper_2.title.lower()).ratio()
 
-                if (titles_edit_distance <= max_edit_distance):
+                if (titles_similarity > adjusted_title_threshold):
 
                     # using the information of paper_2 to enrich paper_1
                     paper_1.enrich(paper_2)
