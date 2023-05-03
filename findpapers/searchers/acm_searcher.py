@@ -192,8 +192,9 @@ def _get_paper(paper_page: html.HtmlElement, paper_doi: str, paper_url: str) -> 
         publication_issn = paper_metadata.get('ISSN', None)
         publication_publisher = paper_metadata.get('publisher', None)
         publication_category = paper_metadata.get('type', None)
+        publisher_title = paper_metadata.get('container-title', 'None')
 
-        publication = Publication(paper_title, publication_isbn,
+        publication = Publication(publisher_title, publication_isbn,
                                   publication_issn, publication_publisher, publication_category)
 
     paper_authors = paper_metadata.get('author', [])
