@@ -38,8 +38,12 @@ class RisPaper:
     id: int
     abstract: str
     authors: List[str]
-    custom1: int
-    custom2: List[str]
+    custom1: bool
+    custom2: bool
+    custom3: List[str]
+    custom4: int
+    custom5: List[str]
+    custom6: List[str]
     date: datetime
     name_of_database: List[str]
     doi: str
@@ -101,33 +105,45 @@ class RisExport:
                       "Preprint": "UNPB"}
 
         try:
-            ris = [RisPaper(id=i,
-                            abstract=p.abstract,
-                            authors=p.authors,
-                            custom1=p.citations,
-                            custom2=list(p.publication.subject_areas),
-                            date=p.publication_date,
-                            name_of_database=list(p.databases),
-                            doi=p.doi,
-                            start_page=_spit_page_information(p.pages)[0],
-                            end_page=_spit_page_information(p.pages)[1],
-                            alternate_title3=p.publication.title,
-                            journal_name=p.publication.title,
-                            keywords=list(p.keywords),
-                            label=p.selected,
-                            notes=p.comments,
-                            publisher=p.publication.publisher,
-                            year=p.publication_date.year,
-                            reviewed_item=(True if p.selected is not None
-                                           else False),
-                            issn=p.publication.issn,
-                            title=p.title,
-                            type_of_reference=entry_type.get(
-                                p.publication.category, "JOUR"),
-                            url=list(p.urls),
-                            publication_year=p.publication_date.year,
-                            access_date=self.search.processed_at.date())
-                   for i, p in enumerate(papers, 1)]  # start key from 1
+            ris = [
+                RisPaper(
+                    id=i,
+                    abstract=p.abstract,
+                    authors=p.authors,
+                    custom1=p.selected,
+                    custom2=p.reviewed,
+                    custom3=(
+                        list(p.criteria) if p.criteria is not None
+                        else None
+                    ),
+                    custom4=p.citations,
+                    custom5=list(p.publication.subject_areas),
+                    custom6=[
+                        'selected', 'reviewed', 'criteria',
+                        'citations', 'subject_areas', 'custom_explanation'],
+                    date=p.publication_date,
+                    name_of_database=list(p.databases),
+                    doi=p.doi,
+                    start_page=_spit_page_information(p.pages)[0],
+                    end_page=_spit_page_information(p.pages)[1],
+                    alternate_title3=p.publication.title,
+                    journal_name=p.publication.title,
+                    keywords=list(p.keywords),
+                    label=p.selected,
+                    notes=p.comments,
+                    publisher=p.publication.publisher,
+                    year=p.publication_date.year,
+                    reviewed_item=(True if p.selected is not None
+                                   else False),
+                    issn=p.publication.issn,
+                    title=p.title,
+                    type_of_reference=entry_type.get(
+                        p.publication.category, "JOUR"),
+                    url=list(p.urls),
+                    publication_year=p.publication_date.year,
+                    access_date=self.search.processed_at.date())
+                for i, p in enumerate(papers, 1)
+            ]  # start key from 1
         except Exception:
             logging.warning('Results can not be converted to RIS',
                             exc_info=True)
@@ -142,11 +158,11 @@ class RisExport:
 
         Returns:
             ris: a RIS compatible and encoded txtio obj. Defaults to None.
-            papers: pandas dataframe of ris objects. Defaults to None.
+            ris_df: pandas dataframe of ris objects. Defaults to None.
         """
 
         if hasattr(self, 'ris'):
-            papers = pd.DataFrame(self.ris)
+            ris_df = pd.DataFrame(self.ris)
 
             # convert to ris
             raw_entries = [asdict(p) for p in self.ris]  # convert to dict
@@ -160,7 +176,7 @@ class RisExport:
                 with open(filename, 'w') as file:
                     file.writelines(ris)
         else:
-            papers = None
+            ris_df = None
             ris = None
             logging.info('Empty results')
-        return ris, papers
+        return ris, ris_df

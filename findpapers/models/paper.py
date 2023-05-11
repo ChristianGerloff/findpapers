@@ -23,6 +23,8 @@ class Paper():
                  number_of_pages: Optional[int] = None,
                  pages: Optional[str] = None,
                  databases: Optional[set] = None,
+                 reviewed: Optional[bool] = False,
+                 criteria: Optional[list] = None,
                  selected: Optional[bool] = None,
                  categories: Optional[bool] = None,
                  references: Optional[list] = [],
@@ -58,6 +60,10 @@ class Paper():
             Paper page number or range, by default None
         databases : set, optional
             The databases where the paper was found, by default None
+        reviewed : bool, optional
+            If a paper was reviewed by the user, by default None
+        criteria : list, optional
+            The criteria used to review the paper, by default None
         selected : bool, optional
             If a paper was selected by the user, by default None
         categories : dict, optional
@@ -95,12 +101,13 @@ class Paper():
         self.number_of_pages = number_of_pages
         self.pages = pages
         self.databases = databases if databases is not None else set()
+        self.reviewed = reviewed
+        self.criteria = criteria
         self.selected = selected
         self.categories = categories
         self.references = references
         self.cites = cites
         self._source = 'primary'
-
 
     @property
     def source(self):
@@ -124,6 +131,22 @@ class Paper():
         sources = ['primary', 'references', 'cites']
         if value in sources:
             self._source = value
+
+    def review(self, selected: bool, criteria: list = []):
+        """
+        Review a paper using a list of criteria
+
+        Parameters
+        ----------
+        selected : bool
+            If the paper was selected
+        criteria : list, optional
+            A list of criteria used to review the paper
+        """
+
+        self.reviewed = True
+        self.criteria = criteria
+        self.selected = selected
 
     def add_database(self, database_name: str):
         """
